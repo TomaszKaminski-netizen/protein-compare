@@ -1,0 +1,20 @@
+[MASTER]
+jobs=1
+unsafe-load-any-extension=no
+optimize-ast=no
+
+[MESSAGES CONTROL]
+confidence=
+enable=all
+disable=too-few-public-methods,redefined-outer-name,use-symbolic-message-instead,
+    bad-continuation,no-self-argument,locally-disabled,suppressed-message,
+
+[FORMAT]
+max-line-length: 100
+max-module-lines=1000
+
+[TYPECHECK]
+ignore-mixin-members=yes
+ignored-modules=flask_sqlalchemy
+ignored-classes=SQLObject,scoped_session
+generated-members=query,delete,commit,rollback
