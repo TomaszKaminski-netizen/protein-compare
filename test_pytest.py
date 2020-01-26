@@ -1,7 +1,7 @@
 """This module is used for unit testing the protein_compare module."""
 
 from pytest import raises
-from protein_compare import one_prot_all_shifts, unpack_generators, full_peptide_comparison, \
+from protein_compare import one_prot_all_shifts, unpack_generators, full_prot_comparison, \
     compare_peptides, amino_acid_properties_matrix, find_structural_motifs
 # pylint:disable=missing-function-docstring
 
@@ -22,7 +22,7 @@ PROT_COMPARE_DATA = {
     "13": {"loop_1": "HWYSFNKKWK", "loop_2": "TVHMNPNKWA", "loop_3": "VEELGPWITV"},  # Three loops
     "142": {"loop_1": "PTQVSEFTRC"}}  # Only one loop
 
-def test_full_peptide_comparison():
+def test_full_prot_comparison():
     expected_result_1 = ("test_data ['loop_1'] shift(['loop_1'], 'first', 3)",
                          ('2', '5', '13', '142'),
                          (
@@ -31,7 +31,7 @@ def test_full_peptide_comparison():
                           (('51', '47', '78', '59'), '13'),
                           (('65', '59', '61', '77'), '142')
                          ))
-    actual_result_1 = unpack_generators(full_peptide_comparison(("test_data", PROT_COMPARE_DATA),
+    actual_result_1 = unpack_generators(full_prot_comparison(("test_data", PROT_COMPARE_DATA),
                                                               shift=(["loop_1"], "first", 3)))
     assert expected_result_1 == actual_result_1
 
@@ -40,7 +40,7 @@ def test_full_peptide_comparison():
                          (
                           (('51', '47', '78', '59'), '13'),
                          ))
-    actual_result_2 = unpack_generators(full_peptide_comparison(("test_data", PROT_COMPARE_DATA),
+    actual_result_2 = unpack_generators(full_prot_comparison(("test_data", PROT_COMPARE_DATA),
                                                                 shift=(["loop_1"], "first", 3),
                                                                 proteins_of_interest=["13"]))
     assert expected_result_2 == actual_result_2
