@@ -15,7 +15,7 @@ from collections.abc import Iterable
 import matplotlib.pyplot as plt
 import numpy as np
 
-def full_peptide_comparison(input_data, **kwargs):
+def full_prot_comparison(input_data, **kwargs):
     """A top-level function that users should be interacting with. It compares
     each protein of interest against every protein in the input file.
     Frameshift can be introduced into the comparisons.
@@ -62,7 +62,7 @@ def full_peptide_comparison(input_data, **kwargs):
 
 def one_prot_all_shifts(prot_of_interest, input_data):
     """A top-level function that users should be interacting with as an
-    alternative to full_peptide_comparison(). This takes a single protein of
+    alternative to full_prot_comparison(). This takes a single protein of
     interest, subjects it to all possible shifts in all loops (individually),
     and compares it against all other proteins.
 
@@ -342,7 +342,7 @@ def quick_analysis(input_file, output_file):
     """
     input_data = (input_file, read_data(input_file))
     loops = ["loop_1", "loop_2"]
-    analysis_func = lambda shift: write_excel_file(output_file, full_peptide_comparison(input_data,
+    analysis_func = lambda shift: write_excel_file(output_file, full_prot_comparison(input_data,
             loops=loops, shift=shift))
     for shift in (("", "", ""),
                   (["loop_1"], "first", 1),
@@ -511,5 +511,5 @@ if __name__ == "__main__":
 
     heatmap(one_prot_all_shifts("prot_two", (exmpl, read_data(exmpl))), self_comparisons="vertical")
 
-    heatmap(full_peptide_comparison((exmpl, read_data(exmpl)), loops=["loop_1", "loop_2"],
+    heatmap(full_prot_comparison((exmpl, read_data(exmpl)), loops=["loop_1", "loop_2"],
             shift=(["loop_1"], "second", 3)), self_comparisons="diagonal")
