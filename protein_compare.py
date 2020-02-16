@@ -126,8 +126,7 @@ def amino_acid_properties_matrix():
             comparison_scores = (comparison_func(aa_2) for aa_2 in all_amino_acids)
             yield comparison_scores, aa_1
 
-    all_amino_acids = tuple("ACDEFGHIKLMNQPRSTVWY")
-    # A tuple of the individual amino acids.
+    all_amino_acids = tuple("ACDEFGHIKLMNQPRSTVWY")  # A tuple of the individual amino acids.
     header = "amino acid comparison matrix"
     comparison_results = how_to_compare()
     return header, all_amino_acids, comparison_results
@@ -146,16 +145,18 @@ def read_data(input_file):
     Returns:
         dict: a dictionary containing all the data from the chosen file
     """
-    prot_seq = dict() if version_info >= (3, 7) else OrderedDict()
     # In python versions 3.7+ the normal dictionary is already ordered, but in lower versions
     # it is necessary to use the OrderedDict object.
+    prot_seq = dict() if version_info >= (3, 7) else OrderedDict()
+
     with open(input_file, "r") as data:
         for line in data:
             words = line.split()
             protein_name, peptides = words[0], words[1:]
-            loops = ("loop_" + str(i) for i in count(1))  # Must be inside the for loop.
+            # This generator expression must be inside the for loop.
+            loops = ("loop_" + str(i) for i in count(1))
+            # Create a sub-dictionary of peptides as values with keys like "loop_1".
             prot_seq[protein_name] = dict(zip(loops, peptides))
-            # Creates a sub-dictionary of peptides as values with keys like "loop_1".
     return prot_seq
 
 
@@ -179,11 +180,10 @@ def compare_proteins(loops, prot_seq, prot_of_interest, shift):
         comparison_score = 0
         for loop in loops:
             peptide_1, peptide_2 = prot_seq[prot_of_interest][loop], prot_seq[prot][loop]
-
+            # If loop_2 is short, the score from the loop_1 comparison becomes twice as important,
+            # so it is copied.
             if len(peptide_1) < 4 or len(peptide_2) < 4:
                 comparison_score += comparison_score
-                # If loop_2 is short, the score from the loop_1 comparison becomes twice as
-                # important, so it is copied.
             else:
                 shift_peptide, shift_index = (shift[1], shift[2]) if loop in shift[0] else ("", "")
                 comparison_score += compare_peptides(peptide_1, peptide_2, shift_peptide,
@@ -207,6 +207,7 @@ def compare_peptides(peptide_1, peptide_2, shift_peptide, shift_index):
     Returns:
         int: a numerical score of how similar the peptides are to each other
     """
+    # This code block is verbose, but optimised for speed.
     if shift_peptide == "first":
         peptide_1_iter = iterate_peptide(peptide_1, shift_index)
     else:
@@ -215,11 +216,10 @@ def compare_peptides(peptide_1, peptide_2, shift_peptide, shift_index):
         peptide_2_iter = iterate_peptide(peptide_2, shift_index)
     else:
         peptide_2_iter = iter(peptide_2)
-    # Verbose, but optimised for speed.
 
+    # If the peptides are of different lengths, this zip() function will truncate the longer peptide
+    # down to the length of the shorter one.
     amino_acid_pairs = zip(peptide_1_iter, peptide_2_iter)
-    # If the peptides are of different lengths, the zip() function will truncate the longer
-    # peptide down to the length of the shorter one.
     similarity_scores = (compare_amino_acids(*aa_pair) for aa_pair in amino_acid_pairs)
     return sum(similarity_scores)
 
@@ -254,13 +254,14 @@ def compare_amino_acids(aa_1, aa_2):
     Returns:
         int: a numerical score of how similar the amino acids are to each other
     """
-    aa_1, aa_2 = aa_1.upper(), aa_2.upper()  # Making sure they are upper case.
+    # Making sure that the strings are all upper case.
+    aa_1, aa_2 = aa_1.upper(), aa_2.upper()
     if aa_1 == aa_2 != "X":
+        # G, P, and C amino acids are more important to preserve, hence they get the higher score.
         misc = 3 if aa_1 in "GPC" else 2
-        # G, P, and C are amino acids that are more important to preserve.
     else:
-        misc = 0
         # This is the value both for non-matching amino acids and matching "X" amino acids.
+        misc = 0
         for category in MISC_SCORES:
             if aa_1 in category[0] and aa_2 in category[0]:
                 misc = category[1]
@@ -298,10 +299,10 @@ SIZE_SCORES = fragmentate_dictionary({"GASC": 0, "VTPDN": 1, "X": 1.5, "EQILMHFK
 MAX_SIZE = 3
 SIZE_WEIGHT = 1.2
 
+# These are respectively: positively charged, negatively charged, Asx/Glx, beta-branched, and
+# neutral aromatic. "YF" needs to be before "HYWF".
 MISC_SCORES = (("RHK", 1), ("DE", 1), ("ND", 1.5), ("QE", 1.5), ("TVLI", 1), ("YF", 1.5),
                ("HYWF", 1))
-# These are respectively: positively charged, negatively charged, Asx/Glx, beta-branched,
-# and neutral aromatic. "YF" needs to be before "HYWF".
 MISC_WEIGHT = 1.8
 
 
@@ -375,8 +376,8 @@ def unpack_generators(data, unwanted_types=None):
                 raise TypeError("unwanted object type {} found: {}".format(unwanted_type, data))
 
     if not isinstance(data, str) and isinstance(data, Iterable):
-        return tuple(unpack_generators(item, unwanted_types) for item in data)
         # As a side-effect this converts all lists, dictionaries, sets, etc. into tuples as well.
+        return tuple(unpack_generators(item, unwanted_types) for item in data)
     else:
         return data
 
@@ -463,30 +464,34 @@ def heatmap(comparison_function, **kwargs):
     map_colours = kwargs.get("map_colours", "coolwarm")
     all_data = unpack_generators(comparison_function)
     title, x_labels = all_data[0], all_data[1]
-    scores, y_labels = zip(*all_data[2])
     # Splitting one list of two-member tuples into two tuples by using the *
+    scores, y_labels = zip(*all_data[2])
+    # A 2D numpy array, needs to be an array of floats for image formation.
     score_array = np.array(scores, float)
-    # A 2D array, needs to be an array of floats for image formation.
+
 
     y_indexes = range(len(y_labels))
     if self_comparisons == "diagonal":
         for index in y_indexes:
+            # Setting cells to None raises a warning at runtime, but the function still works fine.
             score_array[index][index] = None
+
     elif self_comparisons == "vertical":
-        prot_of_interest = search(r"protein (.+) all shifts$", title).group(1)
         # Returns anything of any length between "protein " and " all shifts".
+        prot_of_interest = search(r"protein (.+) all shifts$", title).group(1)
         x_index = x_labels.index(prot_of_interest)
         for y_index in y_indexes:
             score_array[y_index][x_index] = None
-    # Setting cells to None raises a warning at runtime, but the function still works fine.
+
     elif self_comparisons is not None:
         raise ValueError("Invalid value for keyword argument self_comparisons. Choose either" +
             "'vertical', 'diagonal', or None.")
 
+    # Creating the heatmap and colorbar.
     fig, ax = plt.figure(), plt.subplot()
     im = ax.imshow(score_array, cmap=map_colours)
     fig.colorbar(im, ax=ax)
-    # Creating the heatmap and colorbar
+    # Adding axis labels, axis units, and heatmap title.
     ax.set_xticks(np.arange(len(x_labels)))
     ax.set_yticks(np.arange(len(y_labels)))
     ax.set_xticklabels(x_labels)
@@ -494,9 +499,9 @@ def heatmap(comparison_function, **kwargs):
     plt.xlabel("protein of comparison")
     plt.ylabel("variable")
     ax.set_title(title)
-    #Adding axis labels, axis units, and heatmap title.
+    # The below line is necessary due to a bug in matplotlib - will be removed in the future.
     ax.set_ylim(len(y_labels)-0.5, -0.5)
-    # Necessary due to a bug in matplotlib - will be removed in the future.
+
     plt.show()
 
 ###############################################################################

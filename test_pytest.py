@@ -6,10 +6,10 @@ from protein_compare import one_prot_all_shifts, unpack_generators, full_prot_co
 # pylint:disable=missing-function-docstring
 
 def test_unpack_generators():
+    # Checking that unpack_generators correctly raises exceptions.
     bad_test_data = ("aaa", (i for i in range(6)), {"b": 0, "c": 1, "d": 2})
     with raises(TypeError):
         unpack_generators(bad_test_data, [dict])
-    # Checking that unpack_generators correctly raises exceptions.
 
     valid_test_data = ("aaa", (i for i in range(6)), ("bbb", (i for i in range(4))))
     expected_result = ("aaa", (0, 1, 2, 3, 4, 5), ("bbb", (0, 1, 2, 3)))
