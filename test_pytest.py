@@ -2,7 +2,7 @@
 
 from pytest import raises
 from protein_compare import one_prot_all_shifts, unpack_generators, full_prot_comparison, \
-    compare_peptides, amino_acid_properties_matrix, find_structural_motifs
+    compare_peptides, amino_acid_properties_matrix, find_structural_motifs, select_highest_scores
 # pylint:disable=missing-function-docstring
 
 def test_unpack_generators():
@@ -113,3 +113,16 @@ def test_find_structural_motifs():
     for peptide, expected_result in test_data:
         actual_result = find_structural_motifs(peptide)
         assert expected_result == actual_result
+
+def test_select_highest_scores():
+    test_data = ("test_data ['loop_1'] shift(['loop_1'], 'first', 3)",
+                 ('2', '5', '13', '142'),
+                 (
+                  (('73', '43', '54', '81'), '2'),
+                  (('54', '67', '12', '58'), '5'),
+                  (('51', '97', '78', '59'), '13'),
+                  (('65', '59', '99', '77'), '142')
+                 ))
+    expected_result = ("73", "97", "99", "81")
+    actual_result = unpack_generators(select_highest_scores(test_data))
+    assert expected_result == actual_result

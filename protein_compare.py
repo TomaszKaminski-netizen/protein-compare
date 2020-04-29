@@ -101,6 +101,70 @@ def one_prot_all_shifts(prot_of_interest, input_data):
     return header, all_prot_list, comparison_results
 
 
+def all_prots_all_shifts(input_data):
+    """A top-level function that users should be interacting with. This takes
+    all proteins in a file, subjects them to all possible shifts in all loops
+    (individually), and compares them against all other proteins. Only the
+    highest comparison score from each protein vs protein matchup is shown,
+    compressing the data from 3D to 2D.
+
+    Args:
+        input_data (tuple): a two-member tuple containing: a string describing
+            the source of the data, and a dictionary of all the protein peptide
+            sequences for comparison
+
+    Returns:
+        tuple: a three-member tuple, comprising of a: string, list, and
+            how_to_compare() generator
+    """
+
+    def how_to_compare():
+        """A generator function that specifies the details of how the proteins
+        ought to be compared against each other and how the results should be
+        labelled.
+
+        Yields:
+            tuple: a two-member tuple, the first member being a generator
+                yielding similarity scores of comparisons, and the other being
+                the string label for the y-axis
+        """
+        for prot in prot_seq:
+            comparison_results = one_prot_all_shifts(prot, (input_data, prot_seq))
+            # The header and y axis labels that come out of one_prot_all_shifts are ignored.
+            highest_scores = select_highest_scores(comparison_results)
+            yield highest_scores, prot
+
+    data_source, prot_seq = input_data
+    all_prot_list = prot_seq.keys()
+    header = "highest scores from all_prots_all_shifts, {}".format(data_source)
+    highest_comparison_results = how_to_compare()
+    return header, all_prot_list, highest_comparison_results
+
+
+def select_highest_scores(comparison_results):
+    """A generator function that compresses the output of a top-level function,
+    like one_prot_all_shifts. It yields the highest similarity score from each
+    column.
+
+    Arguments:
+        comparison_results (tuple): a three-member tuple, comprising of a
+            string, list, and a how_to_compare() generator
+
+    Yields:
+        str: numerical value of the highest similarity score from one column
+    """
+    unpacked_data = unpack_generators(comparison_results[2])
+    for i in count():
+        try:
+            highest_score = 0
+            for scores, _ in unpacked_data:
+                if int(scores[i]) > highest_score:
+                    highest_score = int(scores[i])
+            yield str(highest_score)
+        except IndexError:
+            break
+
+
 def amino_acid_properties_matrix():
     """A top-level function that users should be interacting with. It creates a
     pairwise amino acid substitution matrix that can be directly compared with
@@ -518,3 +582,5 @@ if __name__ == "__main__":
 
     heatmap(full_prot_comparison((exmpl, read_data(exmpl)), loops=["loop_1", "loop_2"],
             shift=(["loop_1"], "second", 3)), self_comparisons="diagonal")
+
+    heatmap(all_prots_all_shifts((exmpl, read_data(exmpl))), self_comparisons="diagonal")
