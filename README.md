@@ -27,7 +27,7 @@ A list of proteins (everything in *prot_seq* by default) is individually compare
 One chosen protein is compared against every protein in *prot_seq* multiple times. Every time the [frameshift](https://github.com/TomaszKaminski-netizen/protein-compare#loop-comparison-and-frameshift) of the comparison changes, iterating through all the available possibilities.
 
 * **all_prots_all_shifts**\
-One at a time, all proteins in *prot_seq* are passed into the *one_prot_all_shifts* function. However, out of all the similarity scores created for each protein pair by different [frameshifts] (https://github.com/TomaszKaminski-netizen/protein-compare#loop-comparison-and-frameshift), only the highest score is recorded. This compresses the data from 3 dimensions to just 2, making it easier to show graphically whilst still preserving the most important information.
+One at a time, all proteins in *prot_seq* are passed into the *one_prot_all_shifts* function. However, out of all the similarity scores created for each protein pair by different [frameshifts](https://github.com/TomaszKaminski-netizen/protein-compare#loop-comparison-and-frameshift), only the highest score is recorded. This compresses the data from 3 dimensions to just 2, making it easier to show graphically whilst still preserving the most important information.
 
 ### Loop comparison and frameshift
 Protein loops (i.e. peptides) are compared by breaking them up into amino acid pairs; the sequence APT will be compared against WYT as A vs W, P vs Y, and T vs T. This leads to situations like the one illustrated below, where two almost identical peptides might get a very low similarity score because of how the amino acids were paired up.
