@@ -9,6 +9,7 @@ compared.
 
 from re import search, findall, IGNORECASE
 from sys import version_info
+from decimal import getcontext, Decimal
 from itertools import count, product
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -158,11 +159,30 @@ def select_highest_scores(comparison_results):
         try:
             highest_score = 0
             for scores, _ in unpacked_data:
-                if int(scores[i]) > highest_score:
-                    highest_score = int(scores[i])
+                if float(scores[i]) > highest_score:
+                    highest_score = float(scores[i])
+            # Because the scores come from one of the other top-level functions, they are already
+            # guaranteed to have no more than two decimal figures.
             yield str(highest_score)
         except IndexError:
             break
+
+
+def decimal_string(number):
+    """A function which converts float values of comparison scores into strings
+    with two decimal places. No precision is lost this way - the point is to
+    convert numbers like 1.499999999 into "1.50".
+
+    Arguments:
+        number (float): the value of a comparison score
+
+    Returns:
+        str: string representation of a number with two decimal places
+    """
+    getcontext()
+    two_decimal_places = Decimal('0.01')
+    rounded_number = Decimal(number).quantize(two_decimal_places)
+    return str(rounded_number)
 
 
 def amino_acid_properties_matrix():
@@ -185,7 +205,7 @@ def amino_acid_properties_matrix():
                 yielding similarity scores of comparisons, and the other being
                 the string label for the y-axis
         """
-        comparison_func = lambda aa_2: str(round(compare_amino_acids(aa_1, aa_2)))
+        comparison_func = lambda aa_2: decimal_string(compare_amino_acids(aa_1, aa_2))
         for aa_1 in all_amino_acids:
             comparison_scores = (comparison_func(aa_2) for aa_2 in all_amino_acids)
             yield comparison_scores, aa_1
@@ -216,11 +236,13 @@ def read_data(input_file):
     with open(input_file, "r") as data:
         for line in data:
             words = line.split()
-            protein_name, peptides = words[0], words[1:]
-            # This generator expression must be inside the for loop.
-            loops = ("loop_" + str(i) for i in count(1))
-            # Create a sub-dictionary of peptides as values with keys like "loop_1".
-            prot_seq[protein_name] = dict(zip(loops, peptides))
+            # A safeguard that ignores lines composed entirely out of whitespace characters.
+            if words:
+                protein_name, peptides = words[0], words[1:]
+                # This generator expression must be inside the for loop.
+                loops = ("loop_" + str(i) for i in count(1))
+                # Create a sub-dictionary of peptides as values with keys like "loop_1".
+                prot_seq[protein_name] = dict(zip(loops, peptides))
     return prot_seq
 
 
@@ -252,7 +274,7 @@ def compare_proteins(loops, prot_seq, prot_of_interest, shift):
                 shift_peptide, shift_index = (shift[1], shift[2]) if loop in shift[0] else ("", "")
                 comparison_score += compare_peptides(peptide_1, peptide_2, shift_peptide,
                                                      shift_index)
-        yield str(round(comparison_score))
+        yield decimal_string(comparison_score)
 
 
 def compare_peptides(peptide_1, peptide_2, shift_peptide, shift_index):
@@ -269,7 +291,7 @@ def compare_peptides(peptide_1, peptide_2, shift_peptide, shift_index):
         shift_index (int): which index to place the X amino acid in
 
     Returns:
-        int: a numerical score of how similar the peptides are to each other
+        float: a numerical score of how similar the peptides are to each other
     """
     # This code block is verbose, but optimised for speed.
     if shift_peptide == "first":
@@ -316,7 +338,7 @@ def compare_amino_acids(aa_1, aa_2):
         aa_2 (str): the single-letter code of the second amino-acid
 
     Returns:
-        int: a numerical score of how similar the amino acids are to each other
+        float: numerical score of how similar the amino acids are to each other
     """
     # Making sure that the strings are all upper case.
     aa_1, aa_2 = aa_1.upper(), aa_2.upper()
