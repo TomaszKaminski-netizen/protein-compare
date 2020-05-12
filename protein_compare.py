@@ -555,7 +555,6 @@ def heatmap(comparison_function, **kwargs):
     # A 2D numpy array, needs to be an array of floats for image formation.
     score_array = np.array(scores, float)
 
-
     y_indexes = range(len(y_labels))
     if self_comparisons == "diagonal":
         for index in y_indexes:
@@ -574,19 +573,16 @@ def heatmap(comparison_function, **kwargs):
             "'vertical', 'diagonal', or None.")
 
     # Creating the heatmap and colorbar.
-    fig, ax = plt.figure(), plt.subplot()
-    im = ax.imshow(score_array, cmap=map_colours)
-    fig.colorbar(im, ax=ax)
-    # Adding axis labels, axis units, and heatmap title.
-    ax.set_xticks(np.arange(len(x_labels)))
-    ax.set_yticks(np.arange(len(y_labels)))
-    ax.set_xticklabels(x_labels)
-    ax.set_yticklabels(y_labels)
+    plt.imshow(score_array, cmap=map_colours)
+    plt.colorbar()
+    # Adding axis units, axis labels, and heatmap title.
+    plt.xticks(range(len(x_labels)), x_labels)
     plt.xlabel("protein of comparison")
+    plt.yticks(range(len(y_labels)), y_labels)
     plt.ylabel("variable")
-    ax.set_title(title)
+    plt.title(title)
     # The below line is necessary due to a bug in matplotlib - will be removed in the future.
-    ax.set_ylim(len(y_labels)-0.5, -0.5)
+    plt.ylim(len(y_labels)-0.5, -0.5)
 
     plt.show()
 
