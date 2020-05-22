@@ -8,7 +8,7 @@ Simply download *protein_compare.py* and *example_data.txt* into the same folder
 
 Development of this script has been done in Python version 3.7, but care has been taken to ensure backwards compatibility going back at least as far as Python 3.5.
 
-The two external dependencies are **Matplotlib** and **NumPy**. These already come bundled with Python if you are using Anaconda. Otherwise you can install them from PyPI. You can still compare proteins and output the results as a .txt file without needing these dependencies, but you won't be able to call the [*heatmap*](https://github.com/TomaszKaminski-netizen/protein-compare#output-data) function for automated conversion of comparison results into heatmaps.
+The two external dependencies are **Matplotlib** and **Pandas**. These already come bundled with Python if you are using Anaconda. Otherwise you can install them from PyPI.
 
 ## Usage
 
@@ -18,7 +18,7 @@ To begin with, write your protein data into a space- and/or tab-separated .txt f
 
 ### Comparing proteins
 
-The first function you will call is *read_data*, which returns a dictionary containing all the proteins from your .txt file. This dictionary is referred to within the script as *prot_seq*. It can be passed to one of the following three functions:
+The first function you will call is *read_data*, which returns a pandas DataFrame object containing all the proteins from your .txt file. This DataFrame is referred to within the script as *prot_seq*. It can be passed to one of the following three functions:
 
 * **full_prot_comparison**\
 A list of proteins (everything in *prot_seq* by default) is individually compared against every protein in *prot_seq*, including itself. You can specify which loops should be compared (just loop 1 by default) and restrict the first list of proteins to include only a few proteins of interest by specifying values for the *loops* and *proteins_of_interest* keyword arguments respectively. The third keyword argument is *shift*, which introduces [frameshift](https://github.com/TomaszKaminski-netizen/protein-compare#loop-comparison-and-frameshift) into the protein comparisons.
@@ -43,14 +43,14 @@ The protein comparison results can be further processed by one of four functions
 * **heatmap**\
 With the help of pyplot, the results can be visualised as a 2 dimensional heatmap.
 
-* **write_excel_file**\
-The resuts can be written into a .txt file in a format which allows easy conversion into an excel spreadsheet.
+* **write_csv_file**\
+The resuts can be written into a .csv (comma-separated values) file, which can be opened using Microsoft Excel.
 
 * **unpack_generators**\
 The comparison algorithms make heavy use of generator functions and expressions, hence the final output of *one_prot_all_shifts*, *full_prot_comparison*, and *all_prots_all_shifts* contains a lot of generator objects. If you want to further manipulate this data you might need to turn these objects into normal tuples, which can be easily done by passing the data into *unpack_generators*.
 
-* **select_highest_scores**\
-If you are interested only in the highest similarity score from each data column, this function will remove all the rest.
+* **turn_into_dataframe**\
+The results can be turned into a pandas DataFrame object, which is a table of comparison scores with labelled rows and columns. Because of this structure it is far easier to visually inspect than the nested tuples created by *unpack_generators*, and allows the user to utilise the broad range of powerful **Pandas** and **Numpy** data analysis functions.
 
 ### Other features
 
