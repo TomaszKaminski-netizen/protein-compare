@@ -68,4 +68,4 @@ Currently not open to contributions, but comments with suggestions are welcome. 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/TomaszKaminski-netizen/protein-compare/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/TomaszKaminski-netizen/protein-compare/blob/master/LICENSE.txt) file for details.
